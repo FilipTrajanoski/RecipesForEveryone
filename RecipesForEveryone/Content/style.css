@@ -1,0 +1,96 @@
+﻿.recipeInformations div {
+    margin-left: 15%;
+    margin-right: 15%;
+    padding: 10px;
+}
+
+.recipeInformations .image {
+    text-align: center;
+    background: #f8e782;
+}
+
+.recipeInformations .image img {
+    border-radius: 20px;
+}
+
+.reviews, .reviews > div {
+    margin-left: 15%;
+    margin-right: 15%;
+    padding: 10px;
+    background-color: lightgoldenrodyellow;
+}
+
+.reviews {
+    border: 3px solid purple;
+    border-radius: 110px;
+}
+
+.additionalRecipeInformation {
+    text-align: center;
+    background: #facaca
+}
+
+.star-rating {
+    font-size: 21px;
+    text-align: center;
+}
+
+.star{
+    color: gray;
+}
+
+.star.filled{
+    color: gold;
+}
+.star.filled-half {
+    position: relative;
+}
+
+.star.filled-half::before {
+    content: '\2605';
+    position: absolute;
+    /*top: 0;*/
+    left: 0;
+    width: 50%;
+    color: gold;
+    overflow: hidden;
+}
+
+#recipesTable a {
+    text-decoration: none;
+}
+
+#recipesTable tr{
+    text-align:center;
+    vertical-align: middle;
+}
+
+#recipesTable tr:hover a{
+    font-weight: bold;
+}
+
+.custom-textarea {
+    height: 200px;
+    width: 100%;
+}
+
+.userStar {
+    color: gray;
+}
+
+.userStar.filled {
+    color: gold;
+}
+
+.userReview {
+    border: 2px solid darkblue;
+    background-clip: padding-box;
+    background-color: lavender;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+#masterBody{
+    background-color: seashell;
+}

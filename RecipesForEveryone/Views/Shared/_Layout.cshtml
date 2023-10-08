@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes For Everyone</title>
+    @Styles.Render("~/Content/css")
+    <link href="~/Content/mystyle.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+    <link href="~/Content/style.css" rel="stylesheet" />
+    @Scripts.Render("~/bundles/modernizr")
+    @RenderSection("Styles", required: false)
+    
+</head>
+<body id="masterBody">
+    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+        <div class="container-fluid" id="navbar">
+            <a href="/Home/Index" class="navbar-brand" style="font-family: 'Caveat', cursive; background-image: radial-gradient(circle farthest-side, #fceabb, #f8b500); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 28px ">Recipes For Everyone</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarColor01">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item dropdown hover-dropdown">
+                        <a class="nav-link dropdown-toggle" href="/Recipes/Index" id="navbarDropdown" role="button" data-bs-hover="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Recipes
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="/Recipes/Breakfast">Breakfast</a>
+                            <a class="dropdown-item" href="/Recipes/Lunch">Lunch</a>
+                            <a class="dropdown-item" href="/Recipes/Dinner">Dinner</a>
+                            <a class="dropdown-item" href="/Recipes/SideDish">Side dish</a>
+                            <a class="dropdown-item" href="/Recipes/Dessert">Dessert</a>
+                            <a class="dropdown-item" href="/Recipes/Drink">Drink</a>
+                            <a class="dropdown-item" href="/Recipes/Other">Other</a>
+                        </div>
+                    </li>
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <li>@Html.ActionLink("New Recipes", "NewRecipes", "Recipes", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li>@Html.ActionLink("Contest Candidates", "CompetitionCandidates", "Recipes", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li>@Html.ActionLink("Add Roles", "AddUserToRole", "Account", new { area = "" }, new { @class = "nav-link" })</li>
+                    }
+                    @if (User.IsInRole("User"))
+                    {
+                        <li>@Html.ActionLink("Favorite Recipes", "Index", "FavoriteRecipes", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li>@Html.ActionLink("Competition", "Competition", "Recipes", new { area = "" }, new { @class = "nav-link" })</li>
+                    }
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </nav>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - Recipes For Everyone</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

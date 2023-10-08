@@ -1,0 +1,15 @@
+﻿@model IEnumerable<RecipesForEveryone.Models.Recipe>
+@{
+    ViewBag.Title = "IndexAsync";
+}
+
+<h2>Index</h2>
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>@item.Title</li>
+        <h5>@item.DishTypes.Count</h5>
+    }
+</ul>
+
+

@@ -1,0 +1,259 @@
+﻿@model IEnumerable<RecipesForEveryone.Models.Recipe>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>List of recipes</h2>
+
+@if (User.IsInRole("User"))
+{
+    <p>
+        @Html.ActionLink("Create New", "Create", null ,new {@class="btn btn-info"})
+    </p>
+}
+
+@if (User.IsInRole("Administrator"))
+{
+    <p>
+        <button id="addRecipes" class="btn btn-info">Add New Recipes</button>
+    </p>
+}
+
+<table class="table table-hover" id="recipesTable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PreparationTimeInMinutes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberOfServings)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            <th>
+                Rating
+            </th>
+            @if (User.IsInRole("User"))
+            {
+                <th></th>
+                <th></th>
+            }
+            @if (User.IsInRole("Administrator"))
+            {
+                <th></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr class="table-primary">
+                <td>
+                    @Html.ActionLink(item.Title, "Details", new { id = item.Id })
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PreparationTimeInMinutes)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NumberOfServings)
+                </td>
+                <td>
+                    <img src="@item.ImageUrl" style="max-width:250px" />
+                </td>
+                @if (item.NumberOfRatingVotes > 0)
+                {
+                    var averageRating = (item.TotalSumOfRatings * 1.0) / item.NumberOfRatingVotes;
+                    var fullStars = Math.Floor(averageRating);
+                    var halfStar = (averageRating - fullStars) >= 0.25;
+                    <td data-sort="@averageRating">
+                        <div class="star-rating">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                <span class="star @(i <= fullStars ? "filled" : "") @(i == fullStars + 1 && halfStar ? "filled-half" : "")">&#9733;</span>
+                            }
+                            <br/>
+                            <span id="rating">@(averageRating.ToString("0.0")) (@item.NumberOfRatingVotes)</span>
+                        </div>
+                    </td>
+                }
+                else
+                {
+                    <td data-sort="0,0">
+                        <div class="star-rating">
+                            <span class="star">&#9733;</span>
+                            <span class="star">&#9733;</span>
+                            <span class="star">&#9733;</span>
+                            <span class="star">&#9733;</span>
+                            <span class="star">&#9733;</span>
+                            <span id="rating">0.0 (0)</span>
+                        </div>
+                    </td>
+                }
+
+                @if (User.IsInRole("User"))
+                {
+                    <td>
+                        @if (item.CompetitionLevel == 0)
+                        {
+                            <button data-recipe-id="@item.Id" class="btn btn-outline-success js-contest">Contest</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-secondary" disabled>Candidated</button>
+                        }
+                    </td>
+                    <td>
+                        <button data-recipe-id="@item.Id" class="btn btn-outline-primary js-favorite">Love It &#9825;</button>
+                    </td>
+                }
+                @if (User.IsInRole("Administrator"))
+                {
+                    <td>
+                        <button data-recipe-id="@item.Id" class="btn btn-outline-primary js-delete">Delete</button>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var isUserLoggedIn = @(User.Identity.IsAuthenticated ? "true" : "false");
+            var isUserInUserRole = @(User.IsInRole("User") ? "true" : "false"); 
+            var isUserInAdministratorRole = @(User.IsInRole("Administrator") ? "true" : "false"); 
+
+             var columnDefs = [
+                {
+                    targets: [4], // Index of the rating column (zero-based)
+                    type: "numeric", // Specify numeric sorting
+                    orderSequence: ["desc", "asc"], // Specify sorting order (descending first)
+                },
+                {
+                     targets: [3], // Index of the columns you want to disable sorting (zero-based)
+                     orderable: false // Disable sorting for these columns
+                }
+            ];
+
+            if (isUserLoggedIn && isUserInUserRole) {
+                // Only apply columnDefs for columns 5 and 6 if the user is logged in and in the "User" role
+                columnDefs.push({
+                    targets: [5, 6],
+                    orderable: false 
+                });
+            }
+            else if (isUserLoggedIn && isUserInAdministratorRole) {
+                columnDefs.push({
+                    targets: [5],
+                    orderable: false 
+                });
+            }
+
+            var table = $("#recipesTable").DataTable({
+                columnDefs: columnDefs
+            });
+
+            $("#recipesTable").on("click", ".js-contest", function () {
+                var button = $(this);
+                bootbox.confirm({
+                    message: "Would you like to suggest this recipe for the contest?",
+                    closeButton: false,
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success',
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function(result) {
+                        if (result) {
+                            $.ajax({
+                                url: "/Recipes/AddToCompetitionUser/" + button.attr("data-recipe-id"),
+                                method: "GET",
+                                success: function () {
+                                    button.removeClass("btn-outline-success js-contest").addClass("btn-secondary").attr("disabled", true).html("Candidated");
+                                },
+                                error: function (err) {
+                                    console.log(err);
+                                }
+                            })
+                        }
+                    }
+                })
+            })
+
+            $("#recipesTable").on("click", ".js-favorite", function () {
+                var button = $(this);
+
+                bootbox.alert({
+                    message: 'Recipe added to favorite recipes!',
+                    backdrop: true,
+                    closeButton: false,
+                    callback: function () {
+                        $.ajax({
+                            url: "/FavoriteRecipes/AddToFavorites?recipeId=" + button.attr("data-recipe-id"),
+                            method: "GET"
+                        })
+                    }
+                });
+            })
+
+            $("#recipesTable").on("click", ".js-delete", function () {
+                var button = $(this);
+                bootbox.confirm({
+                    message: "Are you sure you want to delete this recipe?",
+                    closeButton: false,
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success',
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: "/Recipes/Delete/" + button.attr("data-recipe-id"),
+                                method: "GET",
+                                success: function () {
+                                    table.row(button.parents("tr")).remove().draw();
+                                }
+                            })
+                        }
+                    }
+                })
+            })
+
+            $("#addRecipes").click(function () {
+                bootbox.dialog({
+                    message: '<div class="text-center"><img src="/379 (2).gif" style="width: 30px"/> Please wait while the new recipes are added.</div>',
+                    closeButton: false
+                });
+
+                $.ajax({
+                    url: "/Recipes/IndexAsync",
+                    method: "GET",
+                    success: function () {
+                        table.draw();
+                    }
+                })
+
+                setTimeout(function () {
+                    bootbox.hideAll();
+                }, 3000);
+            })
+        })
+    </script>
+}

@@ -1,0 +1,20 @@
+﻿@model IEnumerable<RecipesForEveryone.Models.Review>
+
+
+<h3>Reviews (@Model.Count())</h3>
+<hr />
+@foreach (var review in Model)
+{
+    <div class="userReview">
+        <h5>
+            @review.User.UserName.Split('@')[0]
+
+        </h5>
+        @for (var i = 1; i <= 5; i++)
+        {
+            <span class="userStar @(i <= review.Rating ? "filled" : "")">&#9733;</span>
+        }
+        @review.DateCreated.ToString("dd/MM/yyyy")
+        <p>@review.CommentText</p>
+    </div>
+}

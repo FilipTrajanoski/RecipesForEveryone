@@ -1,0 +1,233 @@
+﻿@model RecipesForEveryone.Models.Recipe
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2 style="text-align:center">@Model.Title</h2>
+<hr />
+<input type="hidden" id="ratingInformations" recipe-votes="@Model.NumberOfRatingVotes"
+       recipe-ratings="@Model.TotalSumOfRatings" recipe-id="@Model.Id"/>
+<div class="star-rating">
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span class="star">&#9733;</span>
+    <span id="rating">0.0 (0)</span>
+   
+    <button class="btn btn-warning js-review">Add Rating & Review</button>
+</div>
+<hr />
+<div class="recipeInformations">
+    <div class="summary">
+        <h3>Summary</h3>
+        <p>@Html.Raw(@Model.Summary)</p>
+    </div>
+    <div class="image">
+        <img class="image" src="@Model.ImageUrl" />
+    </div>
+    <div class="additionalRecipeInformation">
+        <h4>Preparation time: @Model.PreparationTimeInMinutes mins</h4>
+        <h4>Servings: @Model.NumberOfServings</h4>
+    </div>
+    <div class="ingredients">
+        <h3>Ingredients</h3>
+        <ul>
+            @foreach (var Ingredient in Model.Ingredients)
+            {
+                <li>@Ingredient.Name - @Ingredient.Amount.ToString("0.##") @Ingredient.Unit</li>
+            }
+        </ul>
+    </div>
+    <div class="instructions">
+        <h3>Directions</h3>
+        @foreach (var Step in Model.RecipeInstructions.ElementAt(0).Steps)
+        {
+            <h5>Step @Step.StepNumber</h5>
+            <p>@Step.Description</p>
+        }
+    </div>
+    <div>
+        <h3>Dish Types</h3>
+        <ul>
+            @foreach(var type in Model.DishTypes)
+            {
+                <li>@type</li>
+            }
+        </ul>
+    </div>
+</div>
+<hr />
+<div class="reviews">
+    <div id="reviewsPlaceholder">
+        <h3>Reviews (@Model.Reviews.Count())</h3>
+        <hr />
+        @foreach (var review in Model.Reviews)
+        {
+            <div class="userReview">
+                <h5>
+                    @review.User.UserName.Split('@')[0]
+
+                </h5>
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <span class="userStar @(i <= review.Rating ? "filled" : "")">&#9733;</span>
+                }
+                @review.DateCreated.ToString("dd/MM/yyyy")
+                <p>@review.CommentText</p>
+            </div>
+        }
+    </div>
+</div>
+
+<p>
+    @if (User.IsInRole("Administrator"))
+    {
+        @Html.ActionLink("Edit", "Edit", new { id = Model.Id }, new {@class="btn btn-info"}) <span> | </span>
+    }
+
+    @Html.ActionLink("Back to List", "Index",null ,new { @class="btn btn-primary"})
+</p>
+
+
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var recipeInformation = $("#ratingInformations");
+            var recipeId = parseInt(recipeInformation.attr("recipe-id"));
+
+            function fillStars() {
+                var votes = parseInt(recipeInformation.attr("recipe-votes"));
+                var ratingSum = parseInt(recipeInformation.attr("recipe-ratings"));
+                if (votes > 0) {
+                    var average = ratingSum / votes;
+                    console.log(average)
+                    var stars = document.getElementsByClassName("star");
+                    Array.from(stars).forEach(function (star, index) {
+                        if (index < Math.floor(average)) {
+                            star.classList.add('filled');
+                        } else if (index === Math.floor(average)) {
+                            const decimalPart = average - Math.floor(average);
+                            if (decimalPart >= 0.25 && decimalPart <= 0.99) {
+                                star.classList.remove('filled');
+                                star.classList.add('filled-half');
+                            } else {
+                                star.classList.remove('filled-half');
+                            }
+                        } else {
+                            star.classList.remove('filled');
+                        }
+                    });
+                    $("#rating").html(average.toFixed(1) + " (" + votes + ")")
+                }
+            }
+
+            fillStars();
+
+
+            $(".js-review").on("click", function () {
+                var isAuthenticated = @User.Identity.IsAuthenticated.ToString().ToLower();
+                console.log(isAuthenticated)
+
+                if (isAuthenticated === true) {
+
+                    var reviewForm = '<form id="reviewForm>"';
+                    reviewForm += '@Html.AntiForgeryToken()'
+                    
+                    reviewForm += '<label><input type="radio" name="rating" value="' + 1 + '" checked> 1 (Poor) </label><br>';
+                    reviewForm += '<label><input type="radio" name="rating" value="' + 2 + '" checked> 2 (Fair) </label><br>';
+                    reviewForm += '<label><input type="radio" name="rating" value="' + 3 + '" checked> 3 (Average) </label><br>';
+                    reviewForm += '<label><input type="radio" name="rating" value="' + 4 + '" checked> 4 (Good) </label><br>';
+                    reviewForm += '<label><input type="radio" name="rating" value="' + 5 + '" checked> 5 (Excellent) </label><br>';
+                    
+
+                    reviewForm += '<div class="form-group"><label for="comment-text">Comment</label><textarea id="comment-text" name="commentText" class="form-control" rows="3"></textarea></div>'
+                    reviewForm += '</form>'
+                    bootbox.confirm({
+                        title: 'Review Recipe',
+                        message: reviewForm,
+                        closeButton: false,
+                        buttons: {
+                            confirm: {
+                                label: 'Submit',
+                                className: 'btn-success'
+                            },
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn-secondary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                var selectedRating = parseInt($("input[name='rating']:checked").val());
+                                var comment = $("#comment-text").val();
+                                var object = {
+                                    id: recipeId,
+                                    rating: selectedRating,
+                                    commentText: comment
+                                }
+
+                                var antiForgeryToken = $('#reviewForm input[name="__RequestVerificationToken"]').val();
+
+                                $.ajax({
+                                    url: "/Recipes/AddReview",
+                                    method: "POST",
+                                    data: object,
+                                    //data: JSON.stringify(object),
+                                    //contentType: 'application/json',
+                                    //headers: {
+                                    //    'RequestVerificationToken': antiForgeryToken // Set the anti-forgery token as a header
+                                    //},
+                                    success: function () {
+                                        var newVotesValue = parseInt(recipeInformation.attr("recipe-votes")) + 1;
+                                        var newRatingSumValue = parseInt(recipeInformation.attr("recipe-ratings")) + selectedRating;
+                                        recipeInformation.attr("recipe-votes", newVotesValue);
+                                        recipeInformation.attr("recipe-ratings", newRatingSumValue);
+                                        fillStars();
+
+                                        $.ajax({
+                                            url: "/Recipes/GetReviews", // Create an action to fetch reviews
+                                            method: "GET",
+                                            data: { id: recipeId }, // Pass the recipeId to fetch reviews for this recipe
+                                            success: function (data) {
+                                                // Replace the content of #reviewsPlaceholder with the updated reviews
+                                                $("#reviewsPlaceholder").html(data);
+                                            }
+                                        });
+                                    }
+                                })
+                                //console.log('Selected Rating:', selectedRating);
+                            }
+                        }
+                    })
+                } else {
+                    bootbox.confirm({
+                        message: "You need to be logged in to rate this recipe!",
+                        closeButton: false,
+                        buttons: {
+                            confirm: {
+                                label: 'Log in',
+                                className: 'btn-success',
+                            },
+                            cancel: {
+                                label: 'Cancel',
+                                className: 'btn-secondary'
+                            }
+                        },
+                        callback: function (result) {
+                            if (result) {
+                                var currentUrl = window.location.href;
+                                var das = currentUrl.split("/Recipes")
+                                var returnUrl = "/Recipes" + das[1];
+                                window.location.href = '/Account/Login?returnUrl=' + returnUrl;
+                            }
+                        }
+                    })
+                }
+            })
+        })
+    </script>
+    
+}

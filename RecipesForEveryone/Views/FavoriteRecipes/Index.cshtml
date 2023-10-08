@@ -1,0 +1,83 @@
+﻿@model IEnumerable<RecipesForEveryone.Models.Recipe>
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Favorite Recipes</h2>
+
+<table class="table" id="recipesTable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a href="/Recipes/Details/@item.Id">@item.Title</a>
+                </td>
+                <td>
+                    <img src="@item.ImageUrl" style="max-width:250px" />
+                </td>
+                <td>
+                    <button data-recipe-id="@item.Id" class="btn btn-outline-primary js-favorite">Remove</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var table = $("#recipesTable").DataTable({
+                columnDefs: [
+                    {
+                        targets: [1,2], // Index of the columns you want to disable sorting (zero-based)
+                        orderable: false // Disable sorting for these columns
+                    }
+                ]
+            });
+            $("#recipesTable .js-favorite").on("click", function(){
+                var button = $(this);
+                bootbox.confirm({
+                    message: 'Would you like to remove this recipe from favorites?',
+                    closeButton: false,
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        if (result) {
+                            $.ajax({
+                                url: "/FavoriteRecipes/RemoveFromFavorites?recipeId=" + button.attr("data-recipe-id"),
+                                method: "GET",
+                                success: function () {
+                                    table.row(button.parents("tr")).remove().draw();
+                                },
+                                error: function (err) {
+                                    console.log(err);
+                                }
+                            })
+                        }
+                    }
+                });
+            })
+        })
+    </script>
+}

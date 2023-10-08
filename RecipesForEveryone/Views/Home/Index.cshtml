@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<main id="homePageBody" style="width: 1000px; margin: auto;">
+    <section class="row" aria-labelledby="aspnetTitle" style="background-color: lightgoldenrodyellow; padding: 30px; font-family: Rubik">
+        <p class="lead" style="font-size: 30px;">
+            Welcome to our delectable online recipe haven, where culinary inspiration
+            comes to life! Explore a treasure trove of meticulously curated recipes that cater to every
+            palate and skill level, inviting you on a journey of flavors and gastronomic delight.
+        </p>
+    </section>
+
+    <div class="row" style="padding:30px;background-color: #fceabb">
+        <section class="col-md-6" aria-labelledby="gettingStartedTitle">
+            <h2 id="gettingStartedTitle">Explore our recipes</h2>
+            <p>
+                Indulge in a diverse collection of recipes spanning global
+                cuisines and dietary preferences, thoughtfully crafted to elevate your
+                home cooking experience. From quick and easy weekday meals to exquisite
+                dishes for special occasions, our repertoire promises to ignite your passion
+                for the art of cooking.
+            </p>
+            <p><a class="btn btn-outline-dark" href="/Recipes/Index">Let's cook &raquo;</a></p>
+        </section>
+        <section class="col-md-6" aria-labelledby="librariesTitle">
+            <a href="/Recipes/Index"><img src="~/large-food-sharing-dining-table.jpg.jpg" style="width: 100%"></a>
+        </section>
+    </div>
+
+    <div class="row" style="padding: 30px; background-color: #f8b500">
+        <section class="col-md-4" aria-labelledby="librariesTitle">
+            <a href="/Recipes/Competition"><img src="~/chef_hat_and_face_spoon.png" style="width: 100%"></a>
+        </section>
+        <section class="col-md-8" aria-labelledby="gettingStartedTitle">
+            <h2 id="gettingStartedTitle">Enter competition</h2>
+            <p>
+                Ignite your culinary creativity and join our thrilling
+                recipe competition! Showcase your kitchen prowess by submitting your
+                original recipes, and stand a chance to win exciting prizes while sharing
+                your love for cooking with our vibrant community of fellow food enthusiasts.
+            </p>
+            <p><a class="btn btn-outline-dark" href="/Recipes/Competition">Let's cook &raquo;</a></p>
+        </section>
+    </div>
+</main>

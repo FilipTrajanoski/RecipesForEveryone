@@ -1,0 +1,81 @@
+﻿@model IEnumerable<RecipesForEveryone.Models.Recipe>
+@{
+    ViewBag.Title = "CompetitionCandidates";
+}
+
+<h2>Competition candidates</h2>
+
+<table class="table" id="recipesTable">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.ActionLink(item.Title, "Details", new { id = item.Id })
+                </td>
+                <td>
+                    <img src="@item.ImageUrl" style="max-width:250px" />
+                </td>
+                
+                <td>
+                    <button data-recipe-id="@item.Id" class="btn btn-outline-success js-contest">Decide</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            var table = $("#recipesTable").DataTable({
+                columnDefs: [
+                    {
+                        targets: [1, 2], // Index of the columns you want to disable sorting (zero-based)
+                        orderable: false // Disable sorting for these columns
+                    }
+                ]
+            });
+            $("#recipesTable .js-contest").on("click", function(){
+                var button = $(this);
+                bootbox.confirm({
+                    message: 'Would you like to add this recipe for the contest?',
+                    closeButton: false,
+                    buttons: {
+                        confirm: {
+                            label: 'Yes',
+                            className: 'btn-success'
+                        },
+                        cancel: {
+                            label: 'No',
+                            className: 'btn-danger'
+                        }
+                    },
+                    callback: function (result) {
+                        $.ajax({
+                            url: "/Recipes/AddToCompetitionAdministrator/" + button.attr("data-recipe-id") + "?value=" + result,
+                            method: "GET",
+                            success: function () {
+                                table.row(button.parents("tr")).remove().draw();
+                            },
+                            error: function (err) {
+                                console.log(err);
+                            }
+                        })
+                    }
+                });
+            })
+        })
+    </script>
+}
