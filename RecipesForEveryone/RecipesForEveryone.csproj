@@ -270,6 +270,10 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="379 %282%29.gif" />
+    <Content Include="App_Data\aspnet-RecipesForEveryone-20230823113548.mdf" />
+    <Content Include="App_Data\aspnet-RecipesForEveryone-20230823113548_log.ldf">
+      <DependentUpon>aspnet-RecipesForEveryone-20230823113548.mdf</DependentUpon>
+    </Content>
     <Content Include="chef_hat_and_face_spoon.png" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -596,9 +600,7 @@
     <Content Include="Views\Recipes\Competition.cshtml" />
     <Content Include="Views\Recipes\ReviewsPartial.cshtml" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Content\bootstrap.rtl.min.css.map" />
     <Content Include="Content\bootstrap.rtl.css.map" />
